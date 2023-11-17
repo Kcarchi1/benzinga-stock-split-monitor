@@ -1,13 +1,17 @@
 import logging
 import time
 
-import selenium
+import requests
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 DELAY_TIME = 600 
+
+WEBHOOK_URL = "CHANGE ME"
+
+WEBHOOK_DELAY = 2
 
 OPTIONS = webdriver.ChromeOptions()
 OPTIONS.add_argument("--disable-notifications")
@@ -29,6 +33,11 @@ def grab_splits(filename: str) -> dict[str, str]:
     except FileNotFoundError:
         open(filename, "w").close()
         return grab_splits(filename)
+
+
+def post_to_webhook(message: str) -> None:
+    time.sleep(WEBHOOK_DELAY)
+    requests.post(url=WEBHOOK_URL, json={"content": message})
 
 
 def main():
@@ -63,8 +72,12 @@ def main():
             pass
         else:
             keys = set(new_splits.keys()) - set(old_splits.keys())
+
             for key in keys:
-                log.info(f"\nStock: {key}\nRatio: {new_splits[key]}\n")
+                message = f"Stock: {key}\nRatio: {new_splits[key]}"
+                log.info(message)
+                post_to_webhook(message=message)
+
 
         log.info("Going to sleep...zzz")
         time.sleep(DELAY_TIME)
