@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 DELAY_TIME = 600 
 
-WEBHOOK_URL = "CHANGE ME"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1175196078715445410/0M8aF-lovgRHZnexZxuxD7qiwSbPlURs9_j6xmqr13Vl6tcF7McPKpXqIKM4UTfIjQ7b"
 
 WEBHOOK_DELAY = 2
 
@@ -35,16 +35,58 @@ def grab_splits(filename: str) -> dict[str, str]:
         return grab_splits(filename)
 
 
-def post_to_webhook(message: str) -> None:
+def post_to_webhook(ticker: str, ratio: str, date: str="") -> None:
     time.sleep(WEBHOOK_DELAY)
-    requests.post(url=WEBHOOK_URL, json={"content": message})
+
+    payload = {
+        "content": None,
+        "embeds": [{
+            "title": "Split Detected :chart_with_upwards_trend:",
+            "color": 662854,
+            "fields": [
+                {
+                "name": "Ticker",
+                "value": ticker,
+                "inline": True
+                },
+                {
+                "name": "Ratio",
+                "value": ratio,
+                "inline": True
+                },
+                {
+                "name": "Ex. Date",
+                "value": "test",
+                "inline": True
+                },
+                {
+                "name": "Links",
+                "value": f"https://www.google.com/search?q={ticker}+stock+split\nhttps://www.sec.gov/edgar/search/#/entityName={ticker}"
+                }
+            ],
+            "footer": {
+                "text": "Benzinga Monitor",
+                "icon_url": "https://www.benzinga.com/next-assets/images/schema-image-default.png"
+            },
+            "timestamp": "2023-11-01T08:11:00.000Z",
+            "thumbnail": {
+                "url": "https://i1.sndcdn.com/artworks-000630740329-qqgqe8-t500x500.jpg"
+            }
+        }],
+        "username": "Benzinga Monitor",
+        "avatar_url": "https://www.benzinga.com/next-assets/images/schema-image-default.png"
+    }
+
+    requests.post(url=WEBHOOK_URL, json=payload)
 
 
 def main():
     log = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-    log.info("Running Benzinga Monitor...")
+    
     while True:
+        log.info("Running Benzinga Monitor...")
+
         driver = webdriver.Chrome(options=OPTIONS)
         driver.get("https://www.benzinga.com/calendars/stock-splits")
 
@@ -74,9 +116,8 @@ def main():
             keys = set(new_splits.keys()) - set(old_splits.keys())
 
             for key in keys:
-                message = f"Stock: {key}\nRatio: {new_splits[key]}"
-                log.info(message)
-                post_to_webhook(message=message)
+                log.info(f"Stock: {key}\nRatio: {new_splits[key]}")
+                post_to_webhook(ticker=key, ratio=new_splits[key])
 
 
         log.info("Going to sleep...zzz")
