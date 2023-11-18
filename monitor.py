@@ -22,7 +22,7 @@ OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
 OPTIONS.add_experimental_option("useAutomationExtension", False) 
 
 
-def grab_splits(filename: str) -> Union[dict[str, list[str]], None]:
+def grab_splits(filename: str) -> dict[str, list[str]]:
     try:
         splits = {}
         with open(filename, "r") as f:
