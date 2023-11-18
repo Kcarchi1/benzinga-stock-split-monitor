@@ -37,7 +37,14 @@ def grab_splits(filename: str) -> Union[dict[str, list[str]], None]:
         return grab_splits(filename)
 
 
-def format_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> dict[str, Union[None, list, str]]:
+def format_webhook(
+    name: str, 
+    ticker: str, 
+    ratio: str, 
+    market: str, 
+    ex_date: str, 
+    announcement_date: str
+) -> dict[str, Union[None, list, str]]:
     return {
         "content": None,
         "embeds": [{
@@ -122,7 +129,7 @@ def main():
         driver.quit()
 
         new_splits = grab_splits("splits.txt")
-        print(new_splits)
+
         if new_splits == old_splits:
             pass
         else:
