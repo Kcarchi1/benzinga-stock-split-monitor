@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-DELAY_TIME = 600 
+MONITOR_DELAY = 600 
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1175247382536003715/kalSxyq4iNm58w566UkcjGLv3J2x2BaovHpY_-A9ctd6JmEGND1jJ-Jn9WonCyMM9UZc"
 
@@ -135,8 +135,8 @@ def main():
         with open("splits.txt", "w") as f:
             for child in children:
                 grandchildren = child.find_elements(By.TAG_NAME, "td")
-                grandchild_list = [grandchild.text for grandchild in grandchildren]
-                f.write(f"{'@'.join(grandchild_list)}\n")
+                grandchildren = [grandchild.text for grandchild in grandchildren]
+                f.write(f"{'@'.join(grandchildren)}\n")
 
         driver.quit()
 
@@ -159,7 +159,7 @@ def main():
                 )
 
         log.info("Going to sleep...zzz")
-        time.sleep(DELAY_TIME)
+        time.sleep(MONITOR_DELAY)
         
 
 if __name__ == "__main__":
