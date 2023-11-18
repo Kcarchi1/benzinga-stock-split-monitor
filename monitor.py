@@ -121,7 +121,6 @@ def main():
                 log.info(f"Stock: {key}\nRatio: {new_splits[key]}")
                 post_to_webhook(ticker=key, ratio=new_splits[key])
 
-
         log.info("Going to sleep...zzz")
         time.sleep(DELAY_TIME)
         
