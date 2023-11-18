@@ -37,7 +37,7 @@ def grab_splits(filename: str) -> Union[dict[str, list[str]], None]:
         return grab_splits(filename)
 
 
-def format_webhook(ticker: str, ratio: str, date: str) -> dict[str, Union[None, list, str]]:
+def format_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> dict[str, Union[None, list, str]]:
     return {
         "content": None,
         "embeds": [{
@@ -45,23 +45,38 @@ def format_webhook(ticker: str, ratio: str, date: str) -> dict[str, Union[None, 
             "color": 662854,
             "fields": [
                 {
-                "name": "Ticker",
-                "value": ticker,
-                "inline": True
+                    "name": "Name",
+                    "value": name,
+                    "inline": True
                 },
                 {
-                "name": "Ratio",
-                "value": ratio,
-                "inline": True
+                    "name": "Ticker",
+                    "value": ticker,
+                    "inline": True
                 },
                 {
-                "name": "Ex. Date",
-                "value": date,
-                "inline": True
+                    "name": "Ratio",
+                    "value": ratio,
+                    "inline": True
                 },
                 {
-                "name": "Links",
-                "value": f"Google:\nhttps://www.google.com/search?q={ticker}+stock+split\nEdgar:\nhttps://www.sec.gov/edgar/search/#/q=%2522fractional%2520shares%2522&entityName={ticker}"
+                    "name": "Market",
+                    "value": market,
+                    "inline": True
+                },
+                {
+                    "name": "Ex-Date",
+                    "value": ex_date,
+                    "inline": True
+                },
+                {
+                    "name": "Date Announced",
+                    "value": announcement_date,
+                    "inline": True
+                },
+                {
+                    "name": "Links",
+                    "value": f"Google:\nhttps://www.google.com/search?q={ticker}+stock+split\nEdgar:\nhttps://www.sec.gov/edgar/search/#/q=%2522fractional%2520shares%2522&entityName={ticker}"
                 }
             ],
             "footer": {
@@ -77,9 +92,9 @@ def format_webhook(ticker: str, ratio: str, date: str) -> dict[str, Union[None, 
     }
 
 
-def post_to_webhook(ticker: str, ratio: str, date: str) -> None:
+def post_to_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> None:
     time.sleep(WEBHOOK_DELAY)
-    requests.post(url=WEBHOOK_URL, json=format_webhook(ticker=ticker, ratio=ratio, date=date))
+    requests.post(url=WEBHOOK_URL, json=format_webhook(name=name, ticker=ticker, ratio=ratio, market=market, ex_date=ex_date, announcement_date=announcement_date))
 
 
 def main():
@@ -107,7 +122,7 @@ def main():
         driver.quit()
 
         new_splits = grab_splits("splits.txt")
-
+        print(new_splits)
         if new_splits == old_splits:
             pass
         else:
@@ -115,7 +130,7 @@ def main():
 
             for key in keys:
                 log.info(f"Stock: {key}\nRatio: {new_splits[key][3]}")
-                post_to_webhook(ticker=key, ratio=new_splits[key][3], date=new_splits[key][0])
+                post_to_webhook(name=new_splits[key][1], ticker=key, ratio=new_splits[key][3], market=new_splits[key][2], ex_date=new_splits[key][0], announcement_date=new_splits[key][4])
 
         log.info("Going to sleep...zzz")
         time.sleep(DELAY_TIME)
