@@ -108,7 +108,12 @@ def post_to_webhook(
     announcement_date: str
 ) -> None:
     time.sleep(WEBHOOK_DELAY)
-    requests.post(url=WEBHOOK_URL, json=format_webhook(name=name, ticker=ticker, ratio=ratio, market=market, ex_date=ex_date, announcement_date=announcement_date))
+    requests.post(
+        url=WEBHOOK_URL, 
+        json=format_webhook(
+            name=name, ticker=ticker, ratio=ratio,  market=market, ex_date=ex_date, announcement_date=announcement_date
+        )
+    )
 
 
 def main():
@@ -138,13 +143,20 @@ def main():
         new_splits = grab_splits("splits.txt")
 
         if new_splits == old_splits:
-            pass
+            log.info("No changes detected")
         else:
             keys = set(new_splits.keys()) - set(old_splits.keys())
 
             for key in keys:
                 log.info(f"Stock: {key}\nRatio: {new_splits[key][3]}")
-                post_to_webhook(name=new_splits[key][1], ticker=key, ratio=new_splits[key][3], market=new_splits[key][2], ex_date=new_splits[key][0], announcement_date=new_splits[key][4])
+                post_to_webhook(
+                    name=new_splits[key][1], 
+                    ticker=key, 
+                    ratio=new_splits[key][3], 
+                    market=new_splits[key][2], 
+                    ex_date=new_splits[key][0], 
+                    announcement_date=new_splits[key][4]
+                )
 
         log.info("Going to sleep...zzz")
         time.sleep(DELAY_TIME)
