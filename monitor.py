@@ -99,7 +99,14 @@ def format_webhook(
     }
 
 
-def post_to_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> None:
+def post_to_webhook(
+    name: str, 
+    ticker: str, 
+    ratio: str, 
+    market: str, 
+    ex_date: str, 
+    announcement_date: str
+) -> None:
     time.sleep(WEBHOOK_DELAY)
     requests.post(url=WEBHOOK_URL, json=format_webhook(name=name, ticker=ticker, ratio=ratio, market=market, ex_date=ex_date, announcement_date=announcement_date))
 
