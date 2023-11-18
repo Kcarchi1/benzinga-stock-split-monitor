@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 DELAY_TIME = 600 
 
-WEBHOOK_URL = "CHANGE ME"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1175247382536003715/kalSxyq4iNm58w566UkcjGLv3J2x2BaovHpY_-A9ctd6JmEGND1jJ-Jn9WonCyMM9UZc"
 
 WEBHOOK_DELAY = 2
 
@@ -22,22 +22,22 @@ OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"])
 OPTIONS.add_experimental_option("useAutomationExtension", False) 
 
 
-def grab_splits(filename: str) -> dict[str, str]:
+def grab_splits(filename: str) -> Union[dict[str, list[str]], None]:
     try:
         splits = {}
         with open(filename, "r") as f:
             lines = f.readlines()
             for line in lines:
-                key, value = line.strip().split("@")
-                splits[key] = value
+                values = line.strip().split("@")
+                splits[values[2]] = values[0:2] + values[3:8]
 
-        return splits
+            return splits
     except FileNotFoundError:
         open(filename, "w").close()
         return grab_splits(filename)
 
 
-def format_webhook(ticker: str, ratio: str) -> dict[str, Union[None, list, str]]:
+def format_webhook(ticker: str, ratio: str, date: str) -> dict[str, Union[None, list, str]]:
     return {
         "content": None,
         "embeds": [{
@@ -56,7 +56,7 @@ def format_webhook(ticker: str, ratio: str) -> dict[str, Union[None, list, str]]
                 },
                 {
                 "name": "Ex. Date",
-                "value": "test",
+                "value": date,
                 "inline": True
                 },
                 {
@@ -77,9 +77,9 @@ def format_webhook(ticker: str, ratio: str) -> dict[str, Union[None, list, str]]
     }
 
 
-def post_to_webhook(ticker: str, ratio: str) -> None:
+def post_to_webhook(ticker: str, ratio: str, date: str) -> None:
     time.sleep(WEBHOOK_DELAY)
-    requests.post(url=WEBHOOK_URL, json=format_webhook(ticker=ticker, ratio=ratio))
+    requests.post(url=WEBHOOK_URL, json=format_webhook(ticker=ticker, ratio=ratio, date=date))
 
 
 def main():
@@ -101,12 +101,8 @@ def main():
         with open("splits.txt", "w") as f:
             for child in children:
                 grandchildren = child.find_elements(By.TAG_NAME, "td")
-
-                for grandchild in grandchildren:
-                    if len((grandchild.find_elements(By.TAG_NAME, "a"))) != 0 and grandchild.text != "Get Alert":
-                        f.write(f"{grandchild.text}")
-                    if ":" in grandchild.text:
-                        f.write(f"@{grandchild.text}\n")
+                grandchild_list = [grandchild.text for grandchild in grandchildren]
+                f.write(f"{'@'.join(grandchild_list)}\n")
 
         driver.quit()
 
@@ -118,8 +114,8 @@ def main():
             keys = set(new_splits.keys()) - set(old_splits.keys())
 
             for key in keys:
-                log.info(f"Stock: {key}\nRatio: {new_splits[key]}")
-                post_to_webhook(ticker=key, ratio=new_splits[key])
+                log.info(f"Stock: {key}\nRatio: {new_splits[key][3]}")
+                post_to_webhook(ticker=key, ratio=new_splits[key][3], date=new_splits[key][0])
 
         log.info("Going to sleep...zzz")
         time.sleep(DELAY_TIME)
