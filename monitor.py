@@ -1,5 +1,7 @@
 import logging
 import time
+from datetime import datetime
+from typing import Union
 
 import requests
 from selenium import webdriver
@@ -9,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 DELAY_TIME = 600 
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1175196078715445410/0M8aF-lovgRHZnexZxuxD7qiwSbPlURs9_j6xmqr13Vl6tcF7McPKpXqIKM4UTfIjQ7b"
+WEBHOOK_URL = "CHANGE ME"
 
 WEBHOOK_DELAY = 2
 
@@ -35,10 +37,8 @@ def grab_splits(filename: str) -> dict[str, str]:
         return grab_splits(filename)
 
 
-def post_to_webhook(ticker: str, ratio: str, date: str="") -> None:
-    time.sleep(WEBHOOK_DELAY)
-
-    payload = {
+def format_webhook(ticker: str, ratio: str) -> dict[str, Union[None, list, str]]:
+    return {
         "content": None,
         "embeds": [{
             "title": "Split Detected :chart_with_upwards_trend:",
@@ -61,14 +61,13 @@ def post_to_webhook(ticker: str, ratio: str, date: str="") -> None:
                 },
                 {
                 "name": "Links",
-                "value": f"https://www.google.com/search?q={ticker}+stock+split\nhttps://www.sec.gov/edgar/search/#/entityName={ticker}"
+                "value": f"Google:\nhttps://www.google.com/search?q={ticker}+stock+split\nEdgar:\nhttps://www.sec.gov/edgar/search/#/q=%2522fractional%2520shares%2522&entityName={ticker}"
                 }
             ],
             "footer": {
-                "text": "Benzinga Monitor",
+                "text": f"Benzinga Monitor • {datetime.now().strftime('%x %I:%M %p')}",
                 "icon_url": "https://www.benzinga.com/next-assets/images/schema-image-default.png"
             },
-            "timestamp": "2023-11-01T08:11:00.000Z",
             "thumbnail": {
                 "url": "https://i1.sndcdn.com/artworks-000630740329-qqgqe8-t500x500.jpg"
             }
@@ -77,7 +76,10 @@ def post_to_webhook(ticker: str, ratio: str, date: str="") -> None:
         "avatar_url": "https://www.benzinga.com/next-assets/images/schema-image-default.png"
     }
 
-    requests.post(url=WEBHOOK_URL, json=payload)
+
+def post_to_webhook(ticker: str, ratio: str) -> None:
+    time.sleep(WEBHOOK_DELAY)
+    requests.post(url=WEBHOOK_URL, json=format_webhook(ticker=ticker, ratio=ratio))
 
 
 def main():
