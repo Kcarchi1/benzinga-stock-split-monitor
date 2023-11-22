@@ -12,7 +12,7 @@ from selenium.common.exceptions import TimeoutException
 
 MONITOR_DELAY = 600 
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1175247382536003715/kalSxyq4iNm58w566UkcjGLv3J2x2BaovHpY_-A9ctd6JmEGND1jJ-Jn9WonCyMM9UZc"
+WEBHOOK_URL = None
 
 WEBHOOK_DELAY = 2
 
