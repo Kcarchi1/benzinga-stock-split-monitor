@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 MONITOR_DELAY = 600 
 
@@ -126,7 +127,10 @@ def main():
         driver = webdriver.Chrome(options=OPTIONS)
         driver.get("https://www.benzinga.com/calendars/stock-splits")
 
-        parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, "ant-table-tbody")))
+        try:
+            parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, "server-side-calendar-container")))
+        except TimeoutException:
+            parent =  WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, "server-side-calendar-container")))
         children = parent.find_elements(By.TAG_NAME, "tr")
         children = children[1:-1]
 
