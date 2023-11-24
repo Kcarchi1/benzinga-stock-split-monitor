@@ -100,14 +100,7 @@ def format_webhook(
     }
 
 
-def post_to_webhook(
-    name: str, 
-    ticker: str, 
-    ratio: str, 
-    market: str, 
-    ex_date: str, 
-    announcement_date: str
-) -> None:
+def post_to_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> None:
     time.sleep(WEBHOOK_DELAY)
     requests.post(
         url=WEBHOOK_URL, 
@@ -128,11 +121,11 @@ def main():
         driver.get("https://www.benzinga.com/calendars/stock-splits")
 
         try:
-            parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, "server-side-calendar-container")))
+            parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "table")))
         except TimeoutException:
-            parent =  WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.CLASS_NAME, "server-side-calendar-container")))
+            log.exception("Table element not found.")
         children = parent.find_elements(By.TAG_NAME, "tr")
-        children = children[1:-1]
+        children = children[1:]
 
         old_splits = grab_splits("splits.txt")
 
