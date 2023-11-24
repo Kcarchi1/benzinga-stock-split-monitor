@@ -121,11 +121,10 @@ def main():
         driver.get("https://www.benzinga.com/calendars/stock-splits")
 
         try:
-            parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "table")))
+            parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
         except TimeoutException:
             log.exception("Table element not found.")
         children = parent.find_elements(By.TAG_NAME, "tr")
-        children = children[1:]
 
         old_splits = grab_splits("splits.txt")
 
@@ -133,7 +132,7 @@ def main():
             for child in children:
                 grandchildren = child.find_elements(By.TAG_NAME, "td")
                 grandchildren = [grandchild.text for grandchild in grandchildren]
-                f.write(f"{'@'.join(grandchildren)}\n")
+                f.write(f"{'@'.join(grandchildren)}\n")  #Adding '@' to serve as a delimiter 
 
         driver.quit()
 
