@@ -21,6 +21,8 @@ MONITOR_DELAY = 600
 
 HEADLESS_MODE = False
 
+SERVER_ENVIRONMENT = False
+
 OPTIONS = webdriver.ChromeOptions()
 OPTIONS.add_argument("--disable-notifications")
 OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
@@ -29,6 +31,13 @@ OPTIONS.add_experimental_option("useAutomationExtension", False)
 
 if HEADLESS_MODE:
     OPTIONS.add_argument("--headless=new")
+
+if SERVER_ENVIRONMENT:
+    if not HEADLESS_MODE:
+        OPTIONS.add_argument("--headless=new")
+
+    OPTIONS.add_argument("--disable-gpu")
+    OPTIONS.add_argument("--no-sandbox")
 
 
 def grab_splits(filename: str) -> dict[str, list[str]]:
@@ -39,7 +48,7 @@ def grab_splits(filename: str) -> dict[str, list[str]]:
             
             for line in lines:
                 values = line.strip().split("@")
-                splits[values[2]] = values[0:2] + values[3:8]  # Setting stock tickers as Keys
+                splits[values[2]] = values[0:2] + values[3:8]  # Setting stock ticker as key and remaining info as its value.
 
             return splits
     except FileNotFoundError:
@@ -132,7 +141,7 @@ def main():
             log.exception("Table element not found.")
             sys.exit(1)
 
-        actions.send_keys_to_element(parent, Keys.PAGE_DOWN).perform()  # Scrolls through table to render table elements
+        actions.send_keys_to_element(parent, Keys.PAGE_DOWN).perform()  # Scrolls through table to render table elements.
         children = parent.find_elements(By.TAG_NAME, "tr")
 
         old_splits = grab_splits("splits.txt")
@@ -140,7 +149,7 @@ def main():
             for child in children:
                 grandchildren = child.find_elements(By.TAG_NAME, "td")
                 grandchildren = [grandchild.text for grandchild in grandchildren]
-                f.write(f"{'@'.join(grandchildren)}\n")  # Adding '@' to serve as a delimiter 
+                f.write(f"{'@'.join(grandchildren)}\n")  # Adding '@' to serve as a delimiter.
 
         driver.quit()
 
