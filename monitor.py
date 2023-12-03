@@ -1,5 +1,6 @@
 import logging
 import time
+import sys
 from datetime import datetime
 from typing import Union
 
@@ -8,13 +9,17 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
-
-MONITOR_DELAY = 600 
+from selenium.webdriver.common.keys import Keys
 
 WEBHOOK_URL = None
 
 WEBHOOK_DELAY = 2
+
+MONITOR_DELAY = 600 
+
+HEADLESS_MODE = False
 
 OPTIONS = webdriver.ChromeOptions()
 OPTIONS.add_argument("--disable-notifications")
@@ -22,15 +27,19 @@ OPTIONS.add_argument("--disable-blink-features=AutomationControlled")
 OPTIONS.add_experimental_option("excludeSwitches", ["enable-automation"]) 
 OPTIONS.add_experimental_option("useAutomationExtension", False) 
 
+if HEADLESS_MODE:
+    OPTIONS.add_argument("--headless=new")
+
 
 def grab_splits(filename: str) -> dict[str, list[str]]:
     try:
         splits = {}
         with open(filename, "r") as f:
             lines = f.readlines()
+            
             for line in lines:
                 values = line.strip().split("@")
-                splits[values[2]] = values[0:2] + values[3:8]
+                splits[values[2]] = values[0:2] + values[3:8]  # Setting stock tickers as Keys
 
             return splits
     except FileNotFoundError:
@@ -38,14 +47,9 @@ def grab_splits(filename: str) -> dict[str, list[str]]:
         return grab_splits(filename)
 
 
-def format_webhook(
-    name: str, 
-    ticker: str, 
-    ratio: str, 
-    market: str, 
-    ex_date: str, 
-    announcement_date: str
-) -> dict[str, Union[None, list, str]]:
+def format_webhook( 
+        name: str, ticker: str, ratio: str, 
+        market: str, ex_date: str, announcement_date: str) -> dict[str, Union[None, list, str]]:
     return {
         "content": None,
         "embeds": [{
@@ -84,7 +88,8 @@ def format_webhook(
                 },
                 {
                     "name": "Links",
-                    "value": f"Google:\nhttps://www.google.com/search?q={ticker}+stock+split\nEdgar:\nhttps://www.sec.gov/edgar/search/#/q=%2522fractional%2520shares%2522&entityName={ticker}"
+                    "value": f"Google:\nhttps://www.google.com/search?q={ticker}+stock+split\nEdgar:\n" \
+                             f"https://www.sec.gov/edgar/search/#/q=%2522fractional%2520shares%2522&entityName={ticker}"
                 }
             ],
             "footer": {
@@ -100,14 +105,14 @@ def format_webhook(
     }
 
 
-def post_to_webhook(name: str, ticker: str, ratio: str, market: str, ex_date: str, announcement_date: str) -> None:
+def post_to_webhook(
+        name: str, ticker: str, ratio: str, 
+        market: str, ex_date: str, announcement_date: str) -> None:
     time.sleep(WEBHOOK_DELAY)
     requests.post(
         url=WEBHOOK_URL, 
         json=format_webhook(
-            name=name, ticker=ticker, ratio=ratio,  market=market, ex_date=ex_date, announcement_date=announcement_date
-        )
-    )
+            name=name, ticker=ticker, ratio=ratio,  market=market, ex_date=ex_date, announcement_date=announcement_date))
 
 
 def main():
@@ -118,26 +123,28 @@ def main():
         log.info("Running Benzinga Monitor...")
 
         driver = webdriver.Chrome(options=OPTIONS)
+        actions = ActionChains(driver)
         driver.get("https://www.benzinga.com/calendars/stock-splits")
 
         try:
             parent = WebDriverWait(driver=driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
         except TimeoutException:
             log.exception("Table element not found.")
+            sys.exit(1)
+
+        actions.send_keys_to_element(parent, Keys.PAGE_DOWN).perform()  # Scrolls through table to render table elements
         children = parent.find_elements(By.TAG_NAME, "tr")
 
         old_splits = grab_splits("splits.txt")
-
         with open("splits.txt", "w") as f:
             for child in children:
                 grandchildren = child.find_elements(By.TAG_NAME, "td")
                 grandchildren = [grandchild.text for grandchild in grandchildren]
-                f.write(f"{'@'.join(grandchildren)}\n")  #Adding '@' to serve as a delimiter 
+                f.write(f"{'@'.join(grandchildren)}\n")  # Adding '@' to serve as a delimiter 
 
         driver.quit()
 
         new_splits = grab_splits("splits.txt")
-
         if new_splits == old_splits:
             log.info("No changes detected")
         else:
