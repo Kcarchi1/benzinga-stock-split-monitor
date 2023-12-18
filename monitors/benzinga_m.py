@@ -22,7 +22,7 @@ class BenzingaMonitor(BaseSeleniumMonitor):
         try:
             parent = self.get_table_body_element()
         except TimeoutException:
-            BenzingaMonitor.log.exception("Table element not found")
+            BenzingaMonitor.log.exception("Table element not found for Benzinga")
             sys.exit(1)
         self._scroll_table(parent)
         children = self.get_table_row_elements(parent)
@@ -52,8 +52,3 @@ class BenzingaMonitor(BaseSeleniumMonitor):
     
     def _format_date(self, date):
         return datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d")
-
-
-if __name__ == "__main__":
-    a = BenzingaMonitor()
-    print(a.run())
