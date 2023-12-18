@@ -34,8 +34,7 @@ class BaseSeleniumMonitor(Monitor):
         self.driver.quit()
 
     def get_table_body_element(self):
-        tbody = WebDriverWait(driver=self.driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
-        return tbody
+        return WebDriverWait(driver=self.driver, timeout=5).until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
 
     def get_table_row_elements(self, body):
         return body.find_elements(By.TAG_NAME, "tr")
