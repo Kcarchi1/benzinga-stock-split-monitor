@@ -18,7 +18,7 @@ class HedgeFollowMonitor(BaseSeleniumMonitor):
         try:
             parent = self.get_table_body_element()
         except TimeoutException:
-            HedgeFollowMonitor.log.exception("Table element not found")
+            HedgeFollowMonitor.log.exception("Table element not found for HedgeFollow")
             sys.exit(1)
         children = self.get_table_row_elements(parent)
         grandchildren = self.get_data_cell_elements(children)
@@ -41,8 +41,3 @@ class HedgeFollowMonitor(BaseSeleniumMonitor):
             standardized_data.append(converted_listing)
         
         return standardized_data
-
-
-if __name__ == "__main__":
-    a = HedgeFollowMonitor()
-    print(a.run())
