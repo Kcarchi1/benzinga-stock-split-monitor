@@ -18,12 +18,10 @@ class StockAnalysisMonitor(BaseRequestsMonitor):
 
     def run(self):
         response = self.session.get(url=self.url)
-        data = json.loads(response.content)
-        return self.standardize(data)
+        listings = json.loads(response.content)
+        return self.standardize(listings["data"]["data"])
     
     def standardize(self, listings):
-        listings = listings["data"]["data"]
-
         standardized_data = []
         for listing in listings:
             converted_listing = {
@@ -31,7 +29,7 @@ class StockAnalysisMonitor(BaseRequestsMonitor):
                 "info": {
                     "company": listing["name"],
                     "ex_date": self._format_date(listing["date"]),
-                    "exchange": "N/A",  # 
+                    "exchange": "N/A",  # Doesn't exist for this data
                     "date_announced": "N/A",  # Doesn't exist for this data
                     "ratio": self._format_text(listing["splitRatio"], " for ", ":")
                 }
@@ -45,9 +43,3 @@ class StockAnalysisMonitor(BaseRequestsMonitor):
 
     def _format_date(self, date):
         return datetime.strptime(date, "%b %d, %Y").strftime("%Y-%m-%d")
-
-
-if __name__ == "__main__":
-    monitor = StockAnalysisMonitor()
-    x = monitor.run()
-    print(x)
