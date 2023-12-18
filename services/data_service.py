@@ -30,6 +30,9 @@ class DataService:
         return json.dumps(data)
 
     def _deserialize(self, data):
+        if data is None:
+            return None
+        
         return json.loads(data)
 
 
