@@ -15,7 +15,7 @@ class DataService:
         self.storage.clear()
 
     def set(self):
-        self.redis.set("benzinga_temp", self._serialize(data=self.storage))
+        self.redis.set("split_temp", self._serialize(data=self.storage))
 
     def get(self):
         return self._deserialize(data=self.redis.get("split_temp"))
