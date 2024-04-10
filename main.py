@@ -1,6 +1,6 @@
-from benzingaa import BenzingaScraper
-from runner import MonitorService
-from dataa_service import DataService
+from scrapers import BenzingaScraper
+from monitor_service import MonitorService
+from data_service import DataService
 
 CONNECT_TIMEOUT = 20
 READ_TIMEOUT = 20
