@@ -27,7 +27,7 @@ def main():
                 MonitorService.log.info("No changes detected")
             else:
                 for data in new_data:
-                    MonitorService.log.info(f"New press release: {data['heading']}")
+                    MonitorService.log.info(f"New press release: {data['ticker']}")
                 MonitorService.log.info("Publishing new data...")
                 service.data_service.publish(new_data)
                 service.data_service.set()
@@ -37,8 +37,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        # post_to_webhook()
-        raise e
+    main()
