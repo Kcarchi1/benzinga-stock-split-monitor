@@ -84,13 +84,11 @@ class BenzingaScraper(BaseSeleniumScraper):
         for listing in listings:
             converted_listing = {
                 "ticker": listing[2],
-                "info": {
-                    "company": listing[1],
-                    "ex_date": self._format_date(listing[0]),
-                    "exchange": listing[3],
-                    "date_announced": self._format_date(listing[5]),
-                    "ratio": listing[4]
-                }
+                "company": listing[1],
+                "ex_date": self._format_date(listing[0]),
+                "exchange": listing[3],
+                "date_announced": self._format_date(listing[5]),
+                "ratio": listing[4]
             }
             standardized_data.append(converted_listing)
         
