@@ -18,7 +18,7 @@ class DataService:
         self.redis.set("benzinga_temp", self._serialize(data=self.storage))
 
     def get(self):
-        return self._deserialize(data=self.redis.get("benzinga_temp"))
+        return self._deserialize(data=self.redis.get("split_temp"))
 
     def compare(self, past_data):
         return [data for data in self.storage if data not in past_data]
